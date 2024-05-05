@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Students List</title>
+    <meta charset="UTF-8">
+    <title>Primary School Insights</title>
 </head>
 <body>
-    <h1>Students List</h1>
-    <ul>
-        {% for student in students %}
-            <li>{{ student.name }} - {{ student.class }}</li>
-        {% endfor %}
-    </ul>
-    <a href="/add">Add New Student</a>
+    <h1>Welcome to Our Study on First Grade Students' Preferences!</h1>
+    <p>This application helps us understand the social dynamics and academic preferences of our first-grade students.</p>
+    <nav>
+        <ul>
+            <li><a href="/templates/questionnaire.html">Fill Out Questionnaire</a></li>
+            <li><a href="/summary.html">View Summary of Results</a></li>
+        </ul>
+    </nav>
 </body>
 </html>

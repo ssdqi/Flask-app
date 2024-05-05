@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Summary</title>
+</head>
+<body>
+    <h1>Summary of Student Preferences</h1>
+    
+    <h2>Mutually Preferred Pairs</h2>
+    <ul>
+        {% for pair in pairs %}
+            <li>{{ pair.student1 }} and {{ pair.student2 }} - Favorite Course: {{ pair.course }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Top 3 Most Popular Students in Each Class</h2>
+    <ul>
+        {% for class_name, students in popular_students.items() %}
+            <li>{{ class_name }}
+                <ul>
+                    {% for student in students %}
+                        <li>{{ student.name }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Courses Sorted by Popularity</h2>
+    <ul>
+        {% for course in popular_courses %}
+            <li>{{ course.name }} - Popularity: {{ course.popularity }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
