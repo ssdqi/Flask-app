@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Students List</title>
+</head>
+<body>
+    <h1>Students List</h1>
+    <ul>
+        {% for student in students %}
+            <li>{{ student.name }} - {{ student.class }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/add">Add New Student</a>
+</body>
+</html>
