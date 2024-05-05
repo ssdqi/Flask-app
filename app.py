@@ -99,28 +99,73 @@ def init_db():
 def index():
     return render_template('index.html')
 
+def fetch_mutually_preferred_pairs():
+    with get_db_connection() as conn:
+        result = conn.execute('''
+        SELECT student1.name AS student1, student2.name AS student2, courses.name AS course
+        FROM preferences
+        JOIN students AS student1 ON preferences.first_choice_id = student1.id
+        JOIN students AS student2 ON preferences.second_choice_id = student2.id
+        JOIN courses ON preferences.course_id = courses.id
+        WHERE preferences.first_choice_id = preferences.second_choice_id
+        ''').fetchall()
+        return result
+
+def fetch_top_students_by_class():
+    with get_db_connection() as conn:
+        result = {}
+        classes = conn.execute('SELECT DISTINCT class FROM students').fetchall()
+        for class_name in classes:
+            students = conn.execute('''
+            SELECT name
+            FROM students
+            WHERE class = ?
+            ORDER BY popularity DESC
+            LIMIT 3
+            ''', (class_name['class'],)).fetchall()
+            result[class_name['class']] = students
+        return result
+
+def fetch_courses_by_popularity():
+    with get_db_connection() as conn:
+        result = conn.execute('''
+        SELECT name, popularity
+        FROM courses
+        ORDER BY popularity DESC
+        ''').fetchall()
+        return result
+
+
+
 @app.route('/summary')
 def summary():
-    with get_db_connection() as db:
-        students = db.execute('SELECT * FROM students').fetchall()
-    return render_template('summary.html', students=students)
+    pairs = fetch_mutually_preferred_pairs()
+    popular_students = fetch_top_students_by_class()
+    popular_courses = fetch_courses_by_popularity()
+    return render_template('summary.html', pairs=pairs, popular_students=popular_students, popular_courses=popular_courses)
+
 
 @app.route('/questionnaire', methods=['GET', 'POST'])
 def questionnaire():
     if request.method == 'POST':
-        student_id = request.form['student_id']
-        teacher_id = request.form['teacher_id']
-        course_id = request.form['favorite_course']
-        first_choice_id = request.form['first_preference']
-        second_choice_id = request.form['second_preference']
-        third_choice_id = request.form['third_preference']
+        # Extract form data
+        student_id = request.form.get('student_id')
+        teacher_id = request.form.get('teacher_id')
+        course_id = request.form.get('favorite_course')
+        first_preference = request.form.get('first_preference')
+        second_preference = request.form.get('second_preference')
+        third_preference = request.form.get('third_preference')
+
+        # Process the data (e.g., save to database)
         with get_db_connection() as db:
             db.execute('''
                 INSERT INTO preferences (
                     student_id, teacher_id, course_id, first_choice_id, second_choice_id, third_choice_id
                 ) VALUES (?, ?, ?, ?, ?, ?)
-            ''', (student_id, teacher_id, course_id, first_choice_id, second_choice_id, third_choice_id))
+            ''', (student_id, teacher_id, course_id, first_preference, second_preference, third_preference))
             db.commit()
+
+        # Redirect to another page or indicate success
         return redirect(url_for('summary'))
     else:
         with get_db_connection() as db:
@@ -129,6 +174,41 @@ def questionnaire():
             courses = db.execute('SELECT * FROM courses').fetchall()
         return render_template('questionnaire.html', students=students, teachers=teachers, courses=courses)
 
+
+def update_db_schema():
+    with get_db_connection() as db:
+        # Add a popularity column to the students table
+        db.execute('''
+            ALTER TABLE students
+            ADD COLUMN popularity INTEGER DEFAULT 0
+        ''')
+
+        # Add a popularity column to the courses table
+        db.execute('''
+            ALTER TABLE courses
+            ADD COLUMN popularity INTEGER DEFAULT 0
+        ''')
+        db.commit()
+
+
+def fetch_top_students_by_class():
+    with get_db_connection() as conn:
+        result = {}
+        classes = conn.execute('SELECT DISTINCT class FROM students').fetchall()
+        for class_name in classes:
+            students = conn.execute('''
+            SELECT name, IFNULL(popularity, 0) AS popularity
+            FROM students
+            WHERE class = ?
+            ORDER BY popularity DESC
+            LIMIT 3
+            ''', (class_name['class'],)).fetchall()
+            result[class_name['class']] = students
+        return result
+
+
 if __name__ == '__main__':
-    init_db()  # Initialize the database
+    init_db()  # Initialize the database with basic schema
+    update_db_schema()  # Update the database schema to add new fields
     app.run(debug=True)
+

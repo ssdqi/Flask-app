@@ -5,7 +5,8 @@
 </head>
 <body>
     <h1>Student Preferences Questionnaire</h1>
-    <form method="post" action="/submit_questionnaire">
+    <form method="post" action="/questionnaire">
+
         <label for="student_id">Student:</label>
         <select id="student_id" name="student_id">
             {% for student in students %}
