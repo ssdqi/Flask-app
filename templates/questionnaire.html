@@ -13,12 +13,14 @@
             {% endfor %}
         </select>
         <br>
+        <br>
         <label for="teacher_id">Teacher:</label>
         <select id="teacher_id" name="teacher_id">
             {% for teacher in teachers %}
                 <option value="{{ teacher.id }}">{{ teacher.name }}</option>
             {% endfor %}
         </select>
+        <br>
         <br>
         <label for="favorite_course">Favorite Course:</label>
         <select id="favorite_course" name="favorite_course">
@@ -27,12 +29,14 @@
             {% endfor %}
         </select>
         <br>
+        <br>
         <label for="first_preference">1st Preferred Play/Work Partner:</label>
         <select id="first_preference" name="first_preference">
             {% for student in students %}
                 <option value="{{ student.id }}">{{ student.name }}</option>
             {% endfor %}
         </select>
+        <br>
         <br>
         <label for="second_preference">2nd Preferred Play/Work Partner:</label>
         <select id="second_preference" name="second_preference">
@@ -41,12 +45,14 @@
             {% endfor %}
         </select>
         <br>
+        <br>
         <label for="third_preference">3rd Preferred Play/Work Partner:</label>
         <select id="third_preference" name="third_preference">
             {% for student in students %}
                 <option value="{{ student.id }}">{{ student.name }}</option>
             {% endfor %}
         </select>
+        <br>
         <br>
         <input type="submit" value="Submit">
     </form>
