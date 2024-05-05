@@ -11,6 +11,11 @@ def get_db_connection():
 
 def init_db():
     with get_db_connection() as db:
+
+        db.execute('DROP TABLE IF EXISTS preferences')
+        db.execute('DROP TABLE IF EXISTS courses')
+        db.execute('DROP TABLE IF EXISTS teachers')
+        db.execute('DROP TABLE IF EXISTS students')
         # Create students table and insert initial data
         db.execute('''
             CREATE TABLE IF NOT EXISTS students (
@@ -43,15 +48,16 @@ def init_db():
         db.execute('''
             CREATE TABLE IF NOT EXISTS teachers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                class TEXT NOT NULL
             );
         ''')
         teachers_data = [
-            ('Alice Johnson',),
-            ('Bob Smith',),
-            ('Carol Taylor',),
+            ('Alice Johnson', '1A'),
+            ('Bob Smith', '1B'),
+            ('Carol Taylor', '1C'),
         ]
-        db.executemany('INSERT INTO teachers (name) VALUES (?)', teachers_data)
+        db.executemany('INSERT INTO teachers (name, class) VALUES (?, ?)', teachers_data)
 
         # Create courses table and insert initial data
         db.execute('''
@@ -88,7 +94,6 @@ def init_db():
             );
         ''')
         db.commit()
-
 
 @app.route('/')
 def index():
