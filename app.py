@@ -253,4 +253,5 @@ if __name__ == '__main__':
     init_db()  # Initialize the database with basic schema
     update_db_schema()  # Update the database schema to add new fields
     app.run(debug=True)
+    jhgjgjhgjghgj
 
