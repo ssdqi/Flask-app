@@ -1,36 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Summary</title>
+    <title>Summary of Results</title>
+    <script>
+        function logPairs() {
+            {% for pair in pairs %}
+                var pairDict = {
+                    student1: "{{ pair.student1 }}",
+                    student2: "{{ pair.student2 }}",
+                    course: "{{ pair.course }}"
+                };
+                console.log(JSON.stringify(pairDict));
+            {% endfor %}
+        }
+        window.onload = logPairs;
+    </script>
+    
 </head>
 <body>
-    <h1>Summary of Student Preferences</h1>
-    
+    <h1>Summary of Results</h1>
+
     <h2>Mutually Preferred Pairs</h2>
-    <ul>
-        {% for pair in pairs %}
-            <li>{{ pair.student1 }} and {{ pair.student2 }} - Favorite Course: {{ pair.course }}</li>
+    <table>
+        <thead>
+            <tr>
+                <th>Student 1</th>
+                <th>Student 2</th>
+                <th>Student 3</th>
+                <th>Course</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pair in pairs %}
+            <tr>
+                <td>{{ pair.student1 }}</td>
+                <td>{{ pair.student2 }}</td>
+                <td>{{ pair.student3 }}</td>
+                <td>{{ pair.course }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Top Students by Class</h2>
+    {% for class_name, students in popular_students.items() %}
+    <h3>Class {{ class_name }}</h3>
+    <ol>
+        {% for student in students %}
+        <li>{{ student.name }} (Popularity: {{ student.popularity }})</li>
         {% endfor %}
-    </ul>
-    
-    <h2>Top 3 Most Popular Students in Each Class</h2>
-    <ul>
-        {% for class_name, students in popular_students.items() %}
-            <li>{{ class_name }}
-                <ul>
-                    {% for student in students %}
-                        <li>{{ student.name }}</li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
-    
-    <h2>Courses Sorted by Popularity</h2>
-    <ul>
+    </ol>
+    {% endfor %}
+
+    <h2>Popular Courses</h2>
+    <ol>
         {% for course in popular_courses %}
-            <li>{{ course.name }} - Popularity: {{ course.popularity }}</li>
+        <li>{{ course.name }} (Popularity: {{ course.popularity }})</li>
         {% endfor %}
-    </ul>
+    </ol>
 </body>
 </html>

@@ -136,14 +136,72 @@ def fetch_courses_by_popularity():
         return result
 
 
-
 @app.route('/summary')
 def summary():
+    student_id = request.args.get('student_id')
+    teacher_id = request.args.get('teacher_id')
+    course_id = request.args.get('course_id')
+
     pairs = fetch_mutually_preferred_pairs()
     popular_students = fetch_top_students_by_class()
     popular_courses = fetch_courses_by_popularity()
+
     return render_template('summary.html', pairs=pairs, popular_students=popular_students, popular_courses=popular_courses)
 
+
+
+def fetch_top_students_by_class(student_id=None, teacher_id=None, course_id=None):
+    with get_db_connection() as conn:
+        result = {}
+        classes = conn.execute('SELECT DISTINCT class FROM students').fetchall()
+        for class_name in classes:
+            students = conn.execute('''
+            SELECT name, IFNULL(popularity, 0) AS popularity
+            FROM students
+            WHERE class =?
+            ORDER BY popularity DESC
+            LIMIT 3
+            ''', (class_name['class'],)).fetchall()
+            result[class_name['class']] = students
+        return result
+
+def fetch_mutually_preferred_pairs(student_id=None, teacher_id=None, course_id=None):
+    with get_db_connection() as conn:
+        query = '''
+        SELECT student1.name AS student1, student2.name AS student2, courses.name AS course
+        FROM preferences
+        JOIN students AS student1 ON preferences.first_choice_id = student1.id
+        JOIN students AS student2 ON preferences.second_choice_id = student2.id
+        JOIN courses ON preferences.course_id = courses.id
+        WHERE preferences.first_choice_id = preferences.second_choice_id
+        '''
+        params = ()
+
+        if student_id:
+            query += ' AND student1.id =?'
+            params += (student_id,)
+
+        if teacher_id:
+            query += ' AND preferences.teacher_id =?'
+            params += (teacher_id,)
+
+        if course_id:
+            query += ' AND preferences.course_id =?'
+            params += (course_id,)
+
+        result = conn.execute(query, params).fetchall()
+        return result
+
+
+
+def fetch_courses_by_popularity():
+    with get_db_connection() as conn:
+        result = conn.execute('''
+        SELECT name, popularity
+        FROM courses
+        ORDER BY popularity DESC
+        ''').fetchall()
+        return result
 
 @app.route('/questionnaire', methods=['GET', 'POST'])
 def questionnaire():
@@ -189,22 +247,6 @@ def update_db_schema():
             ADD COLUMN popularity INTEGER DEFAULT 0
         ''')
         db.commit()
-
-
-def fetch_top_students_by_class():
-    with get_db_connection() as conn:
-        result = {}
-        classes = conn.execute('SELECT DISTINCT class FROM students').fetchall()
-        for class_name in classes:
-            students = conn.execute('''
-            SELECT name, IFNULL(popularity, 0) AS popularity
-            FROM students
-            WHERE class = ?
-            ORDER BY popularity DESC
-            LIMIT 3
-            ''', (class_name['class'],)).fetchall()
-            result[class_name['class']] = students
-        return result
 
 
 if __name__ == '__main__':
